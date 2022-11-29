@@ -64,15 +64,32 @@ for (int sensorCount = 0; sensorCount < 4; sensorCount++)
 }
 
 void moveTail(){
-  servoTail.write(90);
+  for (int degree = 0; degree <=180; degree++)
+  {
+    servoTail.write(degree);
+    delay(20); 
+  }
   delay(200); 
-  servoTail.write(0);
+  for (int degree = 180; degree >=0; degree--)
+  {
+    servoTail.write(degree);
+    delay(20); 
+  }
+  
 }
 
 void moveHead(){
-  servoHead.write(90);
+  for (int degree = 0; degree <=180; degree++)
+  {
+    servoHead.write(degree);
+    delay(20); 
+  }
   delay(200); 
-  servoHead.write(0);
+  for (int degree = 180; degree >=0; degree--)
+  {
+    servoHead.write(degree);
+    delay(20); 
+  }
 }
 
 void movement(int timeIntervalInSeconds){
