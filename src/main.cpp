@@ -8,13 +8,15 @@ DFRobotDFPlayerMini player;
 // Use pins 2 and 3 to communicate with DFPlayer Mini
 static const uint8_t PIN_MP3_TX = 2; // Connects to module's RX 
 static const uint8_t PIN_MP3_RX = 3; // Connects to module's TX 
+static const int baudRate=9600;
 SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
 //Sound config---
 //The number is to identify the song order
 #define mouthSound 1  
-#define earSound 2
-#define pithiSound 3
+#define leftEarSound 2
+#define rightEarSound 3
+#define noseSound 4
 //---
 
 //Infrared config---
@@ -22,31 +24,31 @@ SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 #define infraredMouth 4
 #define infraredLeftEar 5
 #define infraredRightEar 6
-#define infraredPithi 7
-int infraredSensorList[4]={infraredMouth,infraredLeftEar,infraredRightEar,infraredPithi};
+#define infraredNose 7
+
+int infraredSensorList[4]={infraredNose,infraredMouth,infraredLeftEar,infraredRightEar};
 //---
 
 //Servo config---
 //The number is to define digital pin
-#define servoMouthPin 9
+#define servoTailPin 9
 #define servoHeadPin 10
-Servo servoMouth; 
+Servo servoTail; 
 Servo servoHead; 
 //---
 
 
-
-
 void setup() {
-Serial.begin(9600);
+Serial.begin(baudRate);
+softwareSerial.begin(baudRate);
 for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
 {
-  pinMode(infraredSensorList[sensorCount], INPUT);
+  pinMode(infraredSensorList[sensorCount], INPUT_PULLUP);
 }
 
   //Initialize servo
   servoHead.attach(servoHeadPin);
-  servoMouth.attach(servoMouthPin);
+  servoTail.attach(servoTailPin);
   //
 
   // Start communication with DFPlayer Mini
@@ -54,23 +56,34 @@ for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
    Serial.println("DFPlayer Mini connected");
     // Set volume to maximum (0 to 30).
     player.volume(30);
-    // // Play the first MP3 file on the SD card
-    player.play(1);
+    //Stop player
+    player.stop();
   } else {
     Serial.println("Connecting to DFPlayer Mini failed!");
   }
 }
 
-void moveMouth(){
-  servoMouth.write(90);
+void moveTail(){
+  servoTail.write(90);
   delay(200); 
-  servoMouth.write(0);
+  servoTail.write(0);
 }
 
 void moveHead(){
   servoHead.write(90);
   delay(200); 
   servoHead.write(0);
+}
+
+void movement(int timeIntervalInSeconds){
+  unsigned long endTime = millis();
+  unsigned long startTime = 0;
+    while ((endTime - startTime) <= (timeIntervalInSeconds*1000))
+  { 
+    moveHead();
+    moveTail();
+    endTime= millis();
+  }
 }
 
 uint8_t  readFromInfraredSensor(int sensor){
@@ -84,33 +97,35 @@ for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
 
   switch (infraredSensorList[sensorCount])
   {
-  case infraredMouth:
-    if (sensorData==HIGH)
+  case infraredNose:
+    if (sensorData==LOW)
     {
-      player.play(mouthSound);
-      moveMouth();
-      moveHead();
+      player.play(noseSound);
+      movement(40);
     }
     break;
   
   case infraredLeftEar:
-    if (sensorData==HIGH)
+    if (sensorData==LOW)
     {
-      player.play(earSound);
+      player.play(leftEarSound);
+      movement(30);
     }
     break;
 
   case infraredRightEar:
-    if (sensorData==HIGH)
+    if (sensorData==LOW)
     {
-      player.play(earSound);
+      player.play(rightEarSound);
+      movement(35);
     }
     break;
 
-  case infraredPithi:
-    if (sensorData==HIGH)
+  case infraredMouth:
+    if (sensorData==LOW)
     {
-      player.play(pithiSound);
+      player.play(mouthSound);
+      movement(25);
     }
     break;
 
