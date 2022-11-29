@@ -6,8 +6,8 @@
 // Create the Player object
 DFRobotDFPlayerMini player;
 // Use pins 2 and 3 to communicate with DFPlayer Mini
-static const uint8_t PIN_MP3_TX = 2; // Connects to module's RX 
-static const uint8_t PIN_MP3_RX = 3; // Connects to module's TX 
+static const uint8_t PIN_MP3_TX = 3; // Connects to module's RX 
+static const uint8_t PIN_MP3_RX = 2; // Connects to module's TX 
 static const int baudRate=9600;
 SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
@@ -21,7 +21,7 @@ SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
 //Infrared config---
 //The number is to define digital pin
-#define infraredMouth 4
+#define infraredMouth 8
 #define infraredLeftEar 5
 #define infraredRightEar 6
 #define infraredNose 7
@@ -41,7 +41,7 @@ Servo servoHead;
 void setup() {
 Serial.begin(baudRate);
 softwareSerial.begin(baudRate);
-for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
+for (int sensorCount = 0; sensorCount < 4; sensorCount++)
 {
   pinMode(infraredSensorList[sensorCount], INPUT_PULLUP);
 }
@@ -55,7 +55,7 @@ for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
   if (player.begin(softwareSerial)) {
    Serial.println("DFPlayer Mini connected");
     // Set volume to maximum (0 to 30).
-    player.volume(30);
+    player.volume(10);
     //Stop player
     player.stop();
   } else {
@@ -77,61 +77,62 @@ void moveHead(){
 
 void movement(int timeIntervalInSeconds){
   unsigned long endTime = millis();
-  unsigned long startTime = 0;
-    while ((endTime - startTime) <= (timeIntervalInSeconds*1000))
+  unsigned long startTime = endTime;
+  while ((endTime - startTime) <= (timeIntervalInSeconds*1000))
   { 
     moveHead();
+    delay(200); 
     moveTail();
     endTime= millis();
   }
 }
 
 uint8_t  readFromInfraredSensor(int sensor){
+  delay(200);
    return digitalRead(sensor);
 }
 
 void listenInfraredSensors(){
-for (int sensorCount = 1; sensorCount <= 4; sensorCount++)
+for (int sensorCount = 0; sensorCount < 4; sensorCount++)
 {
   uint8_t  sensorData= readFromInfraredSensor(infraredSensorList[sensorCount]);
 
+    if (sensorData==LOW)
+    {
   switch (infraredSensorList[sensorCount])
   {
   case infraredNose:
-    if (sensorData==LOW)
-    {
       player.play(noseSound);
-      movement(40);
-    }
+      //Add servo running time in seconds
+      movement(5);
     break;
   
   case infraredLeftEar:
-    if (sensorData==LOW)
-    {
       player.play(leftEarSound);
-      movement(30);
-    }
+      //Add servo running time in seconds
+      movement(8);
+    
     break;
 
   case infraredRightEar:
-    if (sensorData==LOW)
-    {
       player.play(rightEarSound);
-      movement(35);
-    }
+      //Add servo running time in seconds
+      movement(10);
+    
     break;
 
   case infraredMouth:
-    if (sensorData==LOW)
-    {
       player.play(mouthSound);
-      movement(25);
-    }
+      //Add servo running time in seconds
+      movement(13);
+    
     break;
 
   default:
     break;
   }
+    }
+
 }
 
 }
