@@ -3,12 +3,13 @@
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
 
+static const int baudRate=9600;
+
 // Create the Player object
 DFRobotDFPlayerMini player;
 // Use pins 2 and 3 to communicate with DFPlayer Mini
 static const uint8_t PIN_MP3_TX = 3; // Connects to module's RX 
 static const uint8_t PIN_MP3_RX = 2; // Connects to module's TX 
-static const int baudRate=9600;
 SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
 //Sound config---
